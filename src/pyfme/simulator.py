@@ -65,7 +65,8 @@ class Simulation:
         'rudder': 'aircraft.delta_rudder',
         'aileron': 'aircraft.delta_aileron',
         'elevator': 'aircraft.delta_elevator',
-        'thrust': 'aircraft.delta_t',
+        'delta_t': 'aircraft.delta_t',
+        'thrust': 'aircraft.thrust',
         # system
         'x_earth': 'system.full_state.position.x_earth',
         'y_earth': 'system.full_state.position.y_earth',
@@ -108,6 +109,7 @@ class Simulation:
             the object and attribute where it is calculated. If not given, the
             ones set in `_default_save_vars` are used.
         """
+        print('Instantiating simulation v1')
         self.system = copy.deepcopy(system)
         self.aircraft = copy.deepcopy(aircraft)
         self.environment = copy.deepcopy(environment)

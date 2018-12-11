@@ -36,6 +36,7 @@ class Aircraft(object):
         self.CY, self.Cl, self.Cn = 0, 0, 0
 
         # Thrust
+        self.thrust = 1
         self.Ct = 0
 
         # Forces & moments

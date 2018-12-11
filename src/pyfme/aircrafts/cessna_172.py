@@ -155,13 +155,15 @@ class Cessna172(Aircraft):
         self.J_data = np.array([0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.76, 0.77, 0.78, 0.79, 0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94])
         self.Ct_data = np.array([0.102122, 0.11097, 0.107621, 0.105191, 0.102446, 0.09947, 0.096775, 0.094706, 0.092341, 0.088912, 0.083878, 0.076336, 0.066669, 0.056342, 0.045688, 0.034716, 0.032492, 0.030253, 0.028001, 0.025735, 0.023453, 0.021159, 0.018852, 0.016529, 0.014194, 0.011843, 0.009479, 0.0071, 0.004686, 0.002278, -0.0002, -0.002638, -0.005145, -0.007641, -0.010188])
         self.delta_t_data = np.array([0.0, 1.0])
-        self.omega_data = np.array([1000.0, 2800.0])  # min RPM & max RPM
+        # self.omega_data = np.array([1000.0, 2800.0])  # min RPM & max RPM
+        self.omega_data = np.array([1000.0, 10000.0])  # Lets cheat a bit and make that engine go faaaaast
 
         # CONTROLS
         self.controls = {'delta_elevator': 0,
                          'delta_aileron': 0,
                          'delta_rudder': 0,
-                         'delta_t': 0}
+                         'delta_t': 0,
+                         'thrust': 1}
 
         self.control_limits = {'delta_elevator': (np.deg2rad(-26),
                                                   np.deg2rad(28)),  # rad
@@ -169,7 +171,8 @@ class Cessna172(Aircraft):
                                                  np.deg2rad(20)),  # rad
                                'delta_rudder': (np.deg2rad(-16),
                                                 np.deg2rad(16)),  # rad
-                               'delta_t': (0, 1)}  # non-dimensional
+                               'delta_t': (0, 1),
+                               'thrust': (0, 1)}  # non-dimensional
 
         # Aerodynamic Coefficients
         self.CL, self.CD, self.Cm = 0, 0, 0
@@ -209,6 +212,10 @@ class Cessna172(Aircraft):
     @property
     def delta_t(self):
         return self.controls['delta_t']
+
+    @property
+    def thrust(self):
+        return self.controls['thrust']
 
     def _calculate_aero_lon_forces_moments_coeffs(self, state):
         delta_elev = np.rad2deg(self.controls['delta_elevator'])  # deg
@@ -317,13 +324,15 @@ class Cessna172(Aircraft):
 
     def _calculate_thrust_forces_moments(self, environment):
         delta_t = self.controls['delta_t']
+        thrust = self.controls['thrust']
+
         rho = environment.rho
         V = self.TAS
         prop_rad = self.propeller_radius
 
         # In this model the throttle controls the revolutions of the propeller
         # linearly. Later on, a much detailed model will be included
-        omega = np.interp(delta_t, self.delta_t_data, self.omega_data)  # rpm
+        omega = np.interp(delta_t * thrust, self.delta_t_data, self.omega_data)  # rpm
         omega_RAD = (omega * 2 * np.pi) / 60.0  # rad/s
 
         # We calculate the relation between the thrust coefficient Ct and the
