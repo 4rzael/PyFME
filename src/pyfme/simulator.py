@@ -109,7 +109,6 @@ class Simulation:
             the object and attribute where it is calculated. If not given, the
             ones set in `_default_save_vars` are used.
         """
-        print('Instantiating simulation v1')
         self.system = copy.deepcopy(system)
         self.aircraft = copy.deepcopy(aircraft)
         self.environment = copy.deepcopy(environment)
@@ -141,7 +140,7 @@ class Simulation:
         )
         return self
 
-    def propagate(self, time):
+    def propagate(self, time, verbose=False):
         """Run the simulation by integrating the system until time t.
 
         Parameters
@@ -158,7 +157,8 @@ class Simulation:
         dt = self.dt
         half_dt = self.dt/2
 
-        bar = tqdm.tqdm(total=time, desc='time', initial=self.system.time)
+        if verbose:
+            bar = tqdm.tqdm(total=time, desc='time', initial=self.system.time)
 
         # To deal with floating point issues we cannot check equality to
         # final time to finish propagation
@@ -172,9 +172,11 @@ class Simulation:
                                                        controls)
             self.system.time_step(dt)
             self._save_time_step()
-            bar.update(dt)
+            if verbose:
+                bar.update(dt)
 
-        bar.close()
+        if verbose:
+            bar.close()
 
         results = pd.DataFrame(self.results)
         results.set_index('time', inplace=True)
